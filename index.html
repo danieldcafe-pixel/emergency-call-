@@ -210,7 +210,17 @@
     width:12%;
     border-radius:3px;
     background:#fff;
-    transition:width 6s linear;
+    transition:width 1s linear;
+  }
+  .np-time{
+    width:82%;
+    max-width:340px;
+    display:flex;
+    justify-content:space-between;
+    margin-top:8px;
+    font-size:12px;
+    color:rgba(255,255,255,0.55);
+    font-variant-numeric:tabular-nums;
   }
   .np-back{
     margin-top:auto;
@@ -282,6 +292,10 @@
     <div class="np-title">Now Playing</div>
     <div class="np-track" id="npTrack">Sin Preocupaciones — Los Ilusionados</div>
     <div class="np-progress"><div class="fill" id="npFill"></div></div>
+    <div class="np-time">
+      <span id="npCurrent">1:24</span>
+      <span id="npDuration">3:47</span>
+    </div>
     <button class="np-back" id="npBack">BACK</button>
   </div>
 
@@ -291,17 +305,46 @@
   const npScreen = document.getElementById('npScreen');
   const npFill = document.getElementById('npFill');
   const npBack = document.getElementById('npBack');
+  const npCurrentEl = document.getElementById('npCurrent');
+  const npDurationEl = document.getElementById('npDuration');
+
+  // Track duration and where "playback" starts, in seconds.
+  const TRACK_DURATION = 3*60 + 47;   // 3:47 — matches npDuration label
+  const START_AT = 1*60 + 24;         // 1:24 — matches npCurrent label
+
+  function formatTime(s){
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + String(sec).padStart(2, '0');
+  }
+
+  let elapsed = START_AT;
+  let tickTimer = null;
+
+  function renderTime(){
+    npCurrentEl.textContent = formatTime(elapsed);
+    npDurationEl.textContent = formatTime(TRACK_DURATION);
+    npFill.style.width = Math.min(100, (elapsed / TRACK_DURATION) * 100) + '%';
+  }
 
   function openNowPlayingScreen(){
     npScreen.classList.add('show');
-    npFill.style.width = '12%';
-    // let the progress bar creep forward once the screen is open
-    requestAnimationFrame(()=>{
-      setTimeout(()=>{ npFill.style.width = '70%'; }, 150);
-    });
+    elapsed = START_AT;
+    npFill.style.transition = 'none';
+    renderTime();
+    void npFill.offsetWidth; // force reflow before re-enabling the transition
+    npFill.style.transition = 'width 1s linear';
+
+    clearInterval(tickTimer);
+    tickTimer = setInterval(()=>{
+      elapsed++;
+      if (elapsed >= TRACK_DURATION){ elapsed = TRACK_DURATION; clearInterval(tickTimer); }
+      renderTime();
+    }, 1000);
   }
   function closeNowPlayingScreen(){
     npScreen.classList.remove('show');
+    clearInterval(tickTimer);
   }
   npBack.addEventListener('click', closeNowPlayingScreen);
 
