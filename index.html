@@ -366,7 +366,7 @@
     <div class="sliders">
       <div class="slider power" id="powerSlider">
         <div class="label">slide to power off</div>
-        <div class="knob">
+        <div class="knob" id="powerKnob">
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v9" stroke="#ff3b30" stroke-width="2" stroke-linecap="round"/><path d="M6.5 5.5a8 8 0 1011 0" stroke="#ff3b30" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
         </div>
       </div>
@@ -559,6 +559,19 @@
         setTimeout(openNowPlayingScreen, 700);
       }, 550);
     }
+  });
+
+  // --- Power off slider: sends you back to the home screen ---
+  const powerCtrl = makeDraggable('powerSlider', 'powerKnob', {
+    completeAt: 0.75,
+    onComplete: ()=>{
+      closeNowPlayingScreen();
+      setTimeout(()=>{
+        musicCtrl.reset();
+        sosCtrl.reset();
+        homeScreen.classList.remove('hide');
+      }, 300);
+    },
   });
 
 })();
