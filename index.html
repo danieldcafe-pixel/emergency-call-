@@ -146,24 +146,6 @@
   }
   .phone.bumped{ animation:bump-shake 0.5s ease; }
 
-  .toast{
-    position:absolute;
-    left:50%;
-    top:14%;
-    transform:translate(-50%,-10px);
-    background:rgba(20,20,20,0.92);
-    border:1px solid rgba(255,255,255,0.12);
-    padding:10px 18px;
-    border-radius:14px;
-    font-size:14px;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity 0.25s ease, transform 0.25s ease;
-    white-space:nowrap;
-    z-index:5;
-  }
-  .toast.show{ opacity:1; transform:translate(-50%,0); }
-
 
   /* --- Now Playing full screen --- */
   .screen{
@@ -278,8 +260,6 @@
 
     <div class="hint">Slide to call emergency services</div>
 
-    <div class="toast" id="toast"></div>
-
     <div class="cancel-wrap">
       <div class="cancel-circle">
         <svg viewBox="0 0 24 24" fill="none"><path d="M5 5l14 14M19 5L5 19" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
@@ -308,7 +288,6 @@
 <script>
 (function(){
   const phone = document.getElementById('phone');
-  const toastEl = document.getElementById('toast');
   const npScreen = document.getElementById('npScreen');
   const npFill = document.getElementById('npFill');
   const npBack = document.getElementById('npBack');
@@ -325,13 +304,6 @@
     npScreen.classList.remove('show');
   }
   npBack.addEventListener('click', closeNowPlayingScreen);
-
-  function showToast(msg, ms){
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(()=> toastEl.classList.remove('show'), ms || 1600);
-  }
 
   function makeDraggable(sliderId, knobId, opts){
     const slider = document.getElementById(sliderId);
@@ -396,7 +368,6 @@
   const musicCtrl = makeDraggable('musicSlider', 'musicKnob', {
     completeAt: 0.75,
     onComplete: ()=>{
-      showToast('▶ Reproduciendo música', 1200);
       setTimeout(openNowPlayingScreen, 500);
     },
   });
@@ -411,7 +382,6 @@
       // screen shake, as if someone knocked into him
       phone.classList.remove('bumped'); void phone.offsetWidth;
       phone.classList.add('bumped');
-      showToast('😵 ¡Empujón! Se resbaló el dedo…', 1800);
 
       // reset the SOS knob back to start
       sosCtrl.reset();
@@ -420,7 +390,6 @@
       setTimeout(()=>{
         musicCtrl.setX(document.getElementById('musicSlider').clientWidth - document.getElementById('musicKnob').clientWidth - 6);
         document.getElementById('musicKnob').style.transition = 'transform 0.25s ease';
-        showToast('🎵 Se activó "Play Music" sin querer', 1800);
         sosDisabled = false;
         setTimeout(openNowPlayingScreen, 700);
       }, 550);
