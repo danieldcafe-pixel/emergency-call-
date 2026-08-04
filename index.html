@@ -103,13 +103,13 @@
   .power .knob svg{ width:30px; height:30px; }
 
   /* Play music */
-  .music{ background:linear-gradient(180deg, rgba(40,70,45,0.55), rgba(20,40,25,0.55)); cursor:pointer; }
-  .music .knob{ background:var(--music-green); cursor:pointer; }
+  .music{ background:linear-gradient(180deg, rgba(40,70,45,0.55), rgba(20,40,25,0.55)); }
+  .music .knob{ background:var(--music-green); }
   .music .knob svg{ width:26px; height:26px; margin-left:3px; }
 
   /* SOS */
-  .sos{ background:linear-gradient(180deg, rgba(120,35,30,0.6), rgba(70,15,12,0.6)); cursor:pointer; }
-  .sos .knob{ background:var(--sos-red); font-weight:700; font-size:16px; letter-spacing:0.5px; cursor:pointer; }
+  .sos{ background:linear-gradient(180deg, rgba(120,35,30,0.6), rgba(70,15,12,0.6)); }
+  .sos .knob{ background:var(--sos-red); font-weight:700; font-size:16px; letter-spacing:0.5px; }
 
   .hint{
     margin-top:22px;
@@ -384,7 +384,7 @@
       </div>
     </div>
 
-    <div class="hint">Tap to call emergency services</div>
+    <div class="hint">Slide to call emergency services</div>
 
     <div class="cancel-wrap">
       <div class="cancel-circle">
@@ -406,7 +406,7 @@
       <svg viewBox="0 0 24 24" fill="#fff"><path d="M7 5v14l12-7z"/></svg>
     </div>
     <div class="np-title">Now Playing</div>
-    <div class="np-track" id="npTrack">Sin Preocupaciones — Los Ilusionados</div>
+    <div class="np-track" id="npTrack">Chad Gadya (KP Remix) — Matzapella</div>
     <div class="np-progress"><div class="fill" id="npFill"></div></div>
     <div class="np-time">
       <span id="npCurrent">1:24</span>
@@ -529,49 +529,17 @@
     return { setX, reset: ()=>{ knob.style.transition='transform 0.35s ease'; setX(0); } };
   }
 
-  // --- Tap-activated version: knob animates into place on click/tap ---
-  // instead of being dragged there by hand.
-  function makeTappable(sliderId, knobId, opts){
-    const slider = document.getElementById(sliderId);
-    const knob = document.getElementById(knobId);
-    const maxX = () => slider.clientWidth - knob.clientWidth - 6;
-
-    function setX(x){
-      knob.style.transform = `translateX(${x}px)`;
-    }
-    function reset(){
-      knob.style.transition = 'transform 0.35s ease';
-      setX(0);
-    }
-    function onTap(){
-      if (opts.disabled) return;
-      if (opts.bumpAt){
-        // quick animated slide toward the "bump" point, then interrupted
-        knob.style.transition = 'transform 0.25s cubic-bezier(.2,.8,.2,1)';
-        setX(maxX() * opts.bumpAt);
-        setTimeout(()=>{ opts.onBump && opts.onBump(); }, 260);
-      } else {
-        // quick animated slide straight to completion
-        knob.style.transition = 'transform 0.3s cubic-bezier(.2,.8,.2,1)';
-        setX(maxX());
-        setTimeout(()=>{ opts.onComplete && opts.onComplete(); }, 320);
-      }
-    }
-
-    slider.addEventListener('click', onTap);
-    return { setX, reset };
-  }
-
-  // --- Play Music slider: activates on tap ---
-  const musicCtrl = makeTappable('musicSlider', 'musicKnob', {
+  // --- Play Music slider: works normally ---
+  const musicCtrl = makeDraggable('musicSlider', 'musicKnob', {
+    completeAt: 0.75,
     onComplete: ()=>{
-      setTimeout(openNowPlayingScreen, 300);
+      setTimeout(openNowPlayingScreen, 500);
     },
   });
 
-  // --- SOS slider: activates on tap, then gets interrupted by a "bump" ---
+  // --- SOS slider: gets interrupted by a "bump" partway through ---
   let sosDisabled = false;
-  const sosCtrl = makeTappable('sosSlider', 'sosKnob', {
+  const sosCtrl = makeDraggable('sosSlider', 'sosKnob', {
     bumpAt: 0.55,
     get disabled(){ return sosDisabled; },
     onBump: ()=>{
